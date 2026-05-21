@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -8,20 +9,14 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
 
-const SECTEURS = [
-  'Tous les secteurs',
-  'Immobilier',
-  'BTP / Construction',
-  'Finance & Assurance',
-  'Informatique & Tech',
-  'Santé',
-  'Commerce & Retail',
-  'Restauration & Hôtellerie',
-  'Industrie & Manufacture',
-  'Transport & Logistique',
-  'Éducation & Formation',
-  'Juridique & Conseil',
-  'Autre',
+const FORMES = [
+  'Toutes les formes',
+  'Société anonyme',
+  'Société à responsabilité limitée',
+  'Entreprise individuelle',
+  'Association',
+  'Fondation',
+  'Succursale',
 ]
 
 const CANTONS = [
@@ -30,34 +25,61 @@ const CANTONS = [
   'Neuchâtel', 'Jura', 'Berne',
 ]
 
+const PAR_PAGE = 30
+
 export default function Home() {
   const [recherche, setRecherche] = useState('')
-  const [secteur, setSecteur] = useState('Tous les secteurs')
+  const [forme, setForme] = useState('Toutes les formes')
   const [canton, setCanton] = useState('Tous les cantons')
+  const [enrichiesOnly, setEnrichiesOnly] = useState(false)
   const [entreprises, setEntreprises] = useState([])
   const [loading, setLoading] = useState(false)
   const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(0)
+
+  useEffect(() => {
+    setPage(0)
+  }, [recherche, forme, canton, enrichiesOnly])
 
   useEffect(() => {
     fetchEntreprises()
-  }, [recherche, secteur, canton])
+  }, [recherche, forme, canton, enrichiesOnly, page])
 
   async function fetchEntreprises() {
     setLoading(true)
+    const debut = page * PAR_PAGE
+    const fin = debut + PAR_PAGE - 1
+
     let query = supabase
       .from('entreprises')
-      .select('*', { count: 'exact' })
+      .select('id, nom, canton, ville, adresse, npa, forme_juridique, but_social, numero_ide, enrichie', { count: 'exact' })
       .order('nom')
-      .limit(50)
+      .range(debut, fin)
 
     if (recherche) query = query.ilike('nom', `%${recherche}%`)
-    if (secteur !== 'Tous les secteurs') query = query.eq('secteur', secteur)
+    if (forme !== 'Toutes les formes') query = query.eq('forme_juridique', forme)
     if (canton !== 'Tous les cantons') query = query.eq('canton', canton)
+    if (enrichiesOnly) query = query.eq('enrichie', true)
 
     const { data, count } = await query
     setEntreprises(data || [])
     setTotal(count || 0)
     setLoading(false)
+  }
+
+  const totalPages = Math.ceil(total / PAR_PAGE)
+
+  function tronquer(texte, max = 120) {
+    if (!texte) return ''
+    if (texte.length <= max) return texte
+    return texte.substring(0, max).trim() + '...'
+  }
+
+  function formatAdresse(e) {
+    const parts = []
+    if (e.adresse) parts.push(e.adresse)
+    if (e.npa || e.ville) parts.push(`${e.npa || ''} ${e.ville || ''}`.trim())
+    return parts.join(', ')
   }
 
   return (
@@ -78,14 +100,27 @@ export default function Home() {
           onChange={e => setRecherche(e.target.value)}
         />
         <div style={styles.filters}>
-          <select style={styles.select} value={secteur} onChange={e => setSecteur(e.target.value)}>
-            {SECTEURS.map(s => <option key={s}>{s}</option>)}
+          <select style={styles.select} value={forme} onChange={e => setForme(e.target.value)}>
+            {FORMES.map(f => <option key={f}>{f}</option>)}
           </select>
           <select style={styles.select} value={canton} onChange={e => setCanton(e.target.value)}>
             {CANTONS.map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
-        <p style={styles.resultCount}>{total} entreprise{total > 1 ? 's' : ''} trouvée{total > 1 ? 's' : ''}</p>
+
+        <label style={styles.checkboxRow}>
+          <input
+            type="checkbox"
+            checked={enrichiesOnly}
+            onChange={e => setEnrichiesOnly(e.target.checked)}
+          />
+          <span>Afficher uniquement les fiches complètes</span>
+        </label>
+
+        <p style={styles.resultCount}>
+          {total.toLocaleString('fr-CH')} entreprise{total > 1 ? 's' : ''} trouvée{total > 1 ? 's' : ''}
+          {totalPages > 1 && ` · Page ${page + 1}/${totalPages}`}
+        </p>
       </section>
 
       {/* LISTE */}
@@ -94,24 +129,68 @@ export default function Home() {
         {!loading && entreprises.length === 0 && (
           <p style={styles.empty}>Aucune entreprise trouvée pour ces critères.</p>
         )}
-        {entreprises.map(e => (
-          <div key={e.id} style={styles.card}>
-            <div style={styles.cardHeader}>
-              <h2 style={styles.cardNom}>{e.nom}</h2>
-              {e.secteur && <span style={styles.badge}>{e.secteur}</span>}
+        {!loading && entreprises.map(e => (
+          <Link
+            key={e.id}
+            href={`/entreprise/${e.numero_ide}`}
+            style={styles.cardLink}
+          >
+            <div style={styles.card}>
+              <div style={styles.cardTop}>
+                <h2 style={styles.cardNom}>{e.nom}</h2>
+                {e.enrichie && e.adresse ? (
+                  <span style={styles.badgeEnrichie}>Fiche complète</span>
+                ) : (
+                  <span style={styles.badgeEnCours}>Données en cours</span>
+                )}
+              </div>
+
+              <div style={styles.badgeRow}>
+                {e.forme_juridique && (
+                  <span style={styles.badgeForme}>{e.forme_juridique}</span>
+                )}
+                {e.canton && (
+                  <span style={styles.badgeNeutre}>{e.canton}</span>
+                )}
+              </div>
+
+              {e.but_social && (
+                <p style={styles.but}>{tronquer(e.but_social, 140)}</p>
+              )}
+
+              <div style={styles.cardBottom}>
+                <span style={styles.adresse}>
+                  {e.adresse ? `📍 ${formatAdresse(e)}` : ''}
+                </span>
+                <span style={styles.voirFiche}>Voir la fiche →</span>
+              </div>
             </div>
-            {e.adresse && <p style={styles.cardInfo}>📍 {e.adresse}{e.npa ? `, ${e.npa}` : ''} {e.ville || ''}</p>}
-            {e.canton && <p style={styles.cardInfo}>🏔️ {e.canton}</p>}
-            {e.telephone && <p style={styles.cardInfo}>📞 {e.telephone}</p>}
-            {e.email && <p style={styles.cardInfo}>✉️ {e.email}</p>}
-            {e.site_web && (
-              <a href={e.site_web} target="_blank" rel="noreferrer" style={styles.link}>
-                🌐 Voir le site web
-              </a>
-            )}
-          </div>
+          </Link>
         ))}
       </section>
+
+      {/* PAGINATION */}
+      {!loading && totalPages > 1 && (
+        <section style={styles.pagination}>
+          <button
+            style={{ ...styles.pageBtn, opacity: page === 0 ? 0.4 : 1 }}
+            disabled={page === 0}
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+          >
+            ← Précédent
+          </button>
+          <span style={styles.pageInfo}>
+            Page {page + 1} sur {totalPages}
+          </span>
+          <button
+            style={{ ...styles.pageBtn, opacity: page >= totalPages - 1 ? 0.4 : 1 }}
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage(p => p + 1)}
+          >
+            Suivant →
+          </button>
+        </section>
+      )}
     </main>
   )
 }
@@ -132,23 +211,60 @@ const styles = {
     flex: 1, minWidth: 180, padding: '10px 14px', fontSize: 15,
     border: '2px solid #e0e0e0', borderRadius: 8, background: '#fff',
   },
+  checkboxRow: {
+    display: 'flex', alignItems: 'center', gap: 8,
+    marginTop: 12, fontSize: 14, color: '#555', cursor: 'pointer',
+  },
   resultCount: { color: '#888', fontSize: 14, marginTop: 12 },
   grid: {
-    maxWidth: 800, margin: '0 auto', padding: '16px 20px 60px',
-    display: 'flex', flexDirection: 'column', gap: 16,
+    maxWidth: 800, margin: '0 auto', padding: '16px 20px 20px',
+    display: 'flex', flexDirection: 'column', gap: 12,
   },
+  cardLink: { textDecoration: 'none', color: 'inherit' },
   card: {
-    background: '#fff', borderRadius: 12, padding: '20px 24px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.07)', border: '1px solid #ececec',
+    background: '#fff', borderRadius: 12, padding: '16px 20px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.05)', border: '1px solid #ececec',
+    transition: 'all 0.15s',
+    cursor: 'pointer',
   },
-  cardHeader: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 8 },
-  cardNom: { fontSize: 18, fontWeight: 700, margin: 0, color: '#1a1a2e' },
-  badge: {
-    background: '#eef0ff', color: '#534AB7', borderRadius: 20,
-    padding: '3px 12px', fontSize: 12, fontWeight: 600,
+  cardTop: {
+    display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+    gap: 12, marginBottom: 8,
   },
-  cardInfo: { margin: '4px 0', fontSize: 14, color: '#555' },
-  link: { color: '#534AB7', fontSize: 14, textDecoration: 'none', fontWeight: 500 },
+  cardNom: { fontSize: 16, fontWeight: 700, margin: 0, color: '#1a1a2e', flex: 1 },
+  badgeEnrichie: {
+    background: '#e1f5ee', color: '#085041', fontSize: 11, fontWeight: 600,
+    padding: '3px 10px', borderRadius: 20, whiteSpace: 'nowrap',
+  },
+  badgeEnCours: {
+    background: '#f1efe8', color: '#5f5e5a', fontSize: 11, fontWeight: 600,
+    padding: '3px 10px', borderRadius: 20, whiteSpace: 'nowrap',
+  },
+  badgeRow: { display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' },
+  badgeForme: {
+    background: '#eef0ff', color: '#534AB7', fontSize: 12, fontWeight: 500,
+    padding: '3px 10px', borderRadius: 20,
+  },
+  badgeNeutre: {
+    background: '#f5f5f7', color: '#555', fontSize: 12,
+    padding: '3px 10px', borderRadius: 20,
+  },
+  but: { fontSize: 14, color: '#555', margin: '0 0 10px', lineHeight: 1.5 },
+  cardBottom: {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    paddingTop: 8, borderTop: '1px solid #f0f0f0', gap: 12, flexWrap: 'wrap',
+  },
+  adresse: { fontSize: 13, color: '#888', flex: 1, minWidth: 0 },
+  voirFiche: { fontSize: 13, color: '#534AB7', fontWeight: 600, whiteSpace: 'nowrap' },
   loading: { textAlign: 'center', color: '#888', padding: 40 },
   empty: { textAlign: 'center', color: '#aaa', padding: 40 },
+  pagination: {
+    maxWidth: 800, margin: '0 auto', padding: '20px',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
+  },
+  pageBtn: {
+    background: '#fff', border: '1px solid #ddd', borderRadius: 8,
+    padding: '8px 16px', fontSize: 14, cursor: 'pointer', color: '#1a1a2e',
+  },
+  pageInfo: { fontSize: 14, color: '#666' },
 }
