@@ -19,6 +19,24 @@ const FORMES = [
   'Succursale',
 ]
 
+const SECTEURS = [
+  'Tous les secteurs',
+  'Immobilier',
+  'BTP / Construction',
+  'Finance & Assurance',
+  'Informatique & Tech',
+  'Santé',
+  'Commerce & Retail',
+  'Restauration & Hôtellerie',
+  'Industrie & Manufacture',
+  'Transport & Logistique',
+  'Éducation & Formation',
+  'Juridique & Conseil',
+  'Services aux entreprises',
+  'Arts, Culture & Loisirs',
+  'Autre',
+]
+
 const CANTONS = [
   'Tous les cantons',
   'Genève', 'Vaud', 'Valais', 'Fribourg',
@@ -30,6 +48,7 @@ const PAR_PAGE = 30
 export default function Home() {
   const [recherche, setRecherche] = useState('')
   const [forme, setForme] = useState('Toutes les formes')
+  const [secteur, setSecteur] = useState('Tous les secteurs')
   const [canton, setCanton] = useState('Tous les cantons')
   const [enrichiesOnly, setEnrichiesOnly] = useState(false)
   const [entreprises, setEntreprises] = useState([])
@@ -39,11 +58,11 @@ export default function Home() {
 
   useEffect(() => {
     setPage(0)
-  }, [recherche, forme, canton, enrichiesOnly])
+  }, [recherche, forme, secteur, canton, enrichiesOnly])
 
   useEffect(() => {
     fetchEntreprises()
-  }, [recherche, forme, canton, enrichiesOnly, page])
+  }, [recherche, forme, secteur, canton, enrichiesOnly, page])
 
   async function fetchEntreprises() {
     setLoading(true)
@@ -52,12 +71,13 @@ export default function Home() {
 
     let query = supabase
       .from('entreprises')
-      .select('id, nom, canton, ville, adresse, npa, forme_juridique, but_social, numero_ide, enrichie', { count: 'exact' })
+      .select('id, nom, canton, ville, adresse, npa, forme_juridique, secteur_ia, but_social, numero_ide, enrichie', { count: 'exact' })
       .order('nom')
       .range(debut, fin)
 
     if (recherche) query = query.ilike('nom', `%${recherche}%`)
     if (forme !== 'Toutes les formes') query = query.eq('forme_juridique', forme)
+    if (secteur !== 'Tous les secteurs') query = query.eq('secteur_ia', secteur)
     if (canton !== 'Tous les cantons') query = query.eq('canton', canton)
     if (enrichiesOnly) query = query.eq('enrichie', true)
 
@@ -100,6 +120,9 @@ export default function Home() {
           onChange={e => setRecherche(e.target.value)}
         />
         <div style={styles.filters}>
+          <select style={styles.select} value={secteur} onChange={e => setSecteur(e.target.value)}>
+            {SECTEURS.map(s => <option key={s}>{s}</option>)}
+          </select>
           <select style={styles.select} value={forme} onChange={e => setForme(e.target.value)}>
             {FORMES.map(f => <option key={f}>{f}</option>)}
           </select>
@@ -146,6 +169,9 @@ export default function Home() {
               </div>
 
               <div style={styles.badgeRow}>
+                {e.secteur_ia && (
+                  <span style={styles.badgeSecteur}>{e.secteur_ia}</span>
+                )}
                 {e.forme_juridique && (
                   <span style={styles.badgeForme}>{e.forme_juridique}</span>
                 )}
@@ -241,6 +267,10 @@ const styles = {
     padding: '3px 10px', borderRadius: 20, whiteSpace: 'nowrap',
   },
   badgeRow: { display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' },
+  badgeSecteur: {
+    background: '#e1f5ee', color: '#085041', fontSize: 12, fontWeight: 600,
+    padding: '3px 10px', borderRadius: 20,
+  },
   badgeForme: {
     background: '#eef0ff', color: '#534AB7', fontSize: 12, fontWeight: 500,
     padding: '3px 10px', borderRadius: 20,
