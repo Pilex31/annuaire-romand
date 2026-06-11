@@ -1,0 +1,52 @@
+:root {
+  --bg:          #F2EDE5;
+  --bg-warm:     #E8E0D1;
+  --bg-dark:     #1A1612;
+  --ink:         #1A1612;
+  --ink-soft:    #4A4339;
+  --ink-mute:    #8B8478;
+  --line:        #D8CDB9;
+  --paper:       #FAF6EE;
+  --accent:      #D4502A;
+  --accent-dark: #A93D1F;
+
+  --serif: var(--font-fraunces), Georgia, serif;
+  --sans:  var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+img { max-width: 100%; display: block; }
+
+::selection { background: var(--accent); color: var(--paper); }
+
+/* Spinner / loader lÃ©ger */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.4); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
