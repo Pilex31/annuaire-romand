@@ -683,85 +683,6 @@ export default function Home() {
           color: var(--ink-soft);
         }
 
-        .cards {
-          display: grid; grid-template-columns: repeat(3, 1fr);
-          gap: 1px; background: var(--line);
-          border: 1px solid var(--line);
-        }
-        .card {
-          background: var(--bg); padding: 32px 28px;
-          cursor: pointer;
-          transition: background 0.15s ease, color 0.15s ease, transform 0.25s ease, box-shadow 0.25s ease;
-          position: relative; overflow: hidden;
-          display: flex; flex-direction: column;
-          min-height: 320px;
-          color: inherit;
-          z-index: 1;
-        }
-        .card:hover {
-          background: var(--ink);
-          color: var(--bg);
-          transform: scale(1.02);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-          z-index: 2;
-        }
-        .card > * { position: relative; z-index: 1; }
-        .card:hover .card-num { color: var(--accent); }
-        .card:hover .card-sector {
-          border-color: rgba(242, 237, 229, 0.3);
-          color: var(--bg);
-        }
-        .card:hover .card-loc { color: rgba(242, 237, 229, 0.6); }
-        .card:hover .card-desc { color: rgba(242, 237, 229, 0.7); }
-        .card:hover .card-arrow svg { color: var(--accent); }
-        .card:hover .card-arrow { transform: translate(4px, -4px); }
-
-        .card-head {
-          display: flex; justify-content: space-between;
-          align-items: flex-start; margin-bottom: 32px;
-        }
-        .card-num {
-          font-family: var(--serif);
-          font-style: italic;
-          font-size: 14px; color: var(--ink-soft);
-          transition: color 0.3s;
-        }
-        .card-arrow {
-          width: 28px; height: 28px;
-          display: flex; align-items: center; justify-content: center;
-          transition: transform 0.3s;
-        }
-        .card-arrow svg { width: 100%; height: 100%; transition: color 0.3s; }
-        .card-name {
-          font-family: var(--serif);
-          font-weight: 500; font-size: 22px;
-          line-height: 1.15; letter-spacing: -0.015em;
-          margin-bottom: 12px;
-        }
-        .card-loc {
-          font-size: 13px; color: var(--ink-soft);
-          margin-bottom: 24px;
-          transition: color 0.3s;
-        }
-        .card-desc {
-          font-size: 14px; line-height: 1.55;
-          color: var(--ink-soft);
-          margin-bottom: 24px; flex-grow: 1;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          transition: color 0.3s;
-        }
-        .card-sector {
-          font-size: 11px; text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: var(--ink);
-          padding-top: 16px;
-          border-top: 1px solid var(--line);
-          transition: all 0.3s;
-        }
-
         .pagination {
           display: flex; justify-content: center; align-items: center;
           gap: 32px; margin-top: 60px;
@@ -862,10 +783,96 @@ export default function Home() {
           .search-bar { flex-direction: column; }
           .filters-toggle { justify-content: center; padding: 14px; }
           .section-desc { justify-self: start; }
-          .cards { grid-template-columns: 1fr; }
           footer { padding: 60px 20px 0; }
           .footer-grid { grid-template-columns: 1fr; gap: 40px; }
           .marquee-track { font-size: 22px; }
+        }
+      `}</style>
+
+      {/* Styles GLOBAUX pour les cartes — styled-jsx ne scope pas le <a> de <Link>,
+          donc ces règles doivent être globales pour s'appliquer aux cartes. */}
+      <style jsx global>{`
+        .cards {
+          display: grid; grid-template-columns: repeat(3, 1fr);
+          gap: 1px; background: var(--line);
+          border: 1px solid var(--line);
+        }
+        .card {
+          background: var(--bg); padding: 32px 28px;
+          cursor: pointer;
+          transition: background 0.15s ease, color 0.15s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          position: relative; overflow: hidden;
+          display: flex; flex-direction: column;
+          min-height: 320px;
+          color: inherit;
+          z-index: 1;
+        }
+        .card:hover {
+          background: var(--ink);
+          color: var(--bg);
+          transform: scale(1.02);
+          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+          z-index: 2;
+        }
+        .card > * { position: relative; z-index: 1; }
+        .card:hover .card-num { color: var(--accent); }
+        .card:hover .card-sector {
+          border-color: rgba(242, 237, 229, 0.3);
+          color: var(--bg);
+        }
+        .card:hover .card-loc { color: rgba(242, 237, 229, 0.6); }
+        .card:hover .card-desc { color: rgba(242, 237, 229, 0.7); }
+        .card:hover .card-arrow svg { color: var(--accent); }
+        .card:hover .card-arrow { transform: translate(4px, -4px); }
+
+        .card-head {
+          display: flex; justify-content: space-between;
+          align-items: flex-start; margin-bottom: 32px;
+        }
+        .card-num {
+          font-family: var(--serif);
+          font-style: italic;
+          font-size: 14px; color: var(--ink-soft);
+          transition: color 0.3s;
+        }
+        .card-arrow {
+          width: 28px; height: 28px;
+          display: flex; align-items: center; justify-content: center;
+          transition: transform 0.3s;
+        }
+        .card-arrow svg { width: 100%; height: 100%; transition: color 0.3s; }
+        .card-name {
+          font-family: var(--serif);
+          font-weight: 500; font-size: 22px;
+          line-height: 1.15; letter-spacing: -0.015em;
+          margin-bottom: 12px;
+        }
+        .card-loc {
+          font-size: 13px; color: var(--ink-soft);
+          margin-bottom: 24px;
+          transition: color 0.3s;
+        }
+        .card-desc {
+          font-size: 14px; line-height: 1.55;
+          color: var(--ink-soft);
+          margin-bottom: 24px; flex-grow: 1;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          transition: color 0.3s;
+        }
+        .card-sector {
+          font-size: 11px; text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--ink);
+          padding-top: 16px;
+          border-top: 1px solid var(--line);
+          transition: all 0.3s;
+        }
+
+        @media (max-width: 900px) {
+          .cards { grid-template-columns: 1fr; }
         }
       `}</style>
     </>
