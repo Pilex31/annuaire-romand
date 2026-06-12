@@ -39,6 +39,18 @@ export default function Home() {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)
   const [filtresOuverts, setFiltresOuverts] = useState(false)
+  const [sessionUser, setSessionUser] = useState(null)
+
+  useEffect(() => {
+    // Vérifie si l'utilisateur est connecté (pour afficher "Mon compte")
+    supabase.auth.getSession().then(({ data }) => {
+      setSessionUser(data.session?.user ?? null)
+    })
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSessionUser(session?.user ?? null)
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
 
   useEffect(() => {
     setPage(0)
@@ -99,6 +111,15 @@ export default function Home() {
           <a href="#secteurs">Secteurs</a>
           <a href="#tarifs">Tarifs</a>
           <a href="#referencer">Référencer</a>
+          {sessionUser ? (
+            <Link href="/compte" className="nav-account">
+              Mon compte
+            </Link>
+          ) : (
+            <Link href="/connexion" className="nav-account">
+              Se connecter
+            </Link>
+          )}
         </nav>
       </div>
 
@@ -398,6 +419,16 @@ export default function Home() {
           transition: width 0.3s ease;
         }
         nav a:hover::after { width: 100%; }
+        nav :global(.nav-account) {
+          border: 1px solid currentColor;
+          padding: 8px 18px;
+          border-radius: 100px;
+          transition: background 0.2s, color 0.2s;
+        }
+        nav :global(.nav-account)::after { display: none; }
+        nav :global(.nav-account):hover {
+          background: currentColor;
+        }
 
         .hero {
           min-height: 100vh;
