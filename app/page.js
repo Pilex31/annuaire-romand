@@ -38,6 +38,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)
+  const [filtresOuverts, setFiltresOuverts] = useState(false)
 
   useEffect(() => {
     setPage(0)
@@ -149,15 +150,28 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ─── SEARCH + FILTRES ─── */}
-      <section className="search-section" id="annuaire">
-        <div>
-          <span className="search-eyebrow">— Recherche</span>
-          <h2 className="search-title">
-            Trouvez la bonne <em>entreprise</em>.
-          </h2>
+      {/* ─── ANNUAIRE : RECHERCHE + FILTRES + RÉSULTATS ─── */}
+      <section className="annuaire-section" id="annuaire">
+        <div className="section-header">
+          <div>
+            <span className="section-num">— 01 / Annuaire</span>
+            <h2 className="section-title-big">
+              {recherche || secteur || canton ? (
+                <>Résultats <em>filtrés</em>.</>
+              ) : (
+                <>Trouvez la bonne <em>entreprise</em>.</>
+              )}
+            </h2>
+          </div>
+          <p className="section-desc">
+            {total.toLocaleString('fr-CH')} entreprise{total > 1 ? 's' : ''} trouvée
+            {total > 1 ? 's' : ''}
+            {totalPages > 1 && ` · Page ${page + 1} sur ${totalPages}`}
+          </p>
         </div>
-        <div className="search-area">
+
+        {/* Barre de recherche + bouton filtres */}
+        <div className="search-bar">
           <div className="search-input-wrap">
             <input
               className="search-input"
@@ -174,91 +188,69 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Filtres secteurs */}
-          <div className="filter-grid">
-            <button
-              className={`filter-tag ${secteur === null ? 'active' : ''}`}
-              onClick={() => setSecteur(null)}
+          <button
+            className={`filters-toggle ${filtresOuverts ? 'active' : ''}`}
+            onClick={() => setFiltresOuverts(!filtresOuverts)}
+          >
+            Filtres
+            {(secteur || canton) && <span className="filters-dot"></span>}
+            <svg
+              className="filters-chevron"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
             >
-              Tous les secteurs
-            </button>
-            {SECTEURS.map((s) => (
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Panneau filtres (accordéon) */}
+        <div className={`filters-panel ${filtresOuverts ? 'open' : ''}`}>
+          <div className="filters-panel-inner">
+            {/* Filtres secteurs */}
+            <div className="filter-grid">
               <button
-                key={s}
-                className={`filter-tag ${secteur === s ? 'active' : ''}`}
-                onClick={() => setSecteur(secteur === s ? null : s)}
+                className={`filter-tag ${secteur === null ? 'active' : ''}`}
+                onClick={() => setSecteur(null)}
               >
-                {s}
+                Tous les secteurs
               </button>
-            ))}
-          </div>
+              {SECTEURS.map((s) => (
+                <button
+                  key={s}
+                  className={`filter-tag ${secteur === s ? 'active' : ''}`}
+                  onClick={() => setSecteur(secteur === s ? null : s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
 
-          {/* Filtres cantons */}
-          <div className="canton-row">
-            <span className="canton-label">Cantons</span>
-            <button
-              className={`canton-chip ${canton === null ? 'active' : ''}`}
-              onClick={() => setCanton(null)}
-            >
-              Tous
-            </button>
-            {CANTONS.map((c) => (
+            {/* Filtres cantons */}
+            <div className="canton-row">
+              <span className="canton-label">Cantons</span>
               <button
-                key={c}
-                className={`canton-chip ${canton === c ? 'active' : ''}`}
-                onClick={() => setCanton(canton === c ? null : c)}
+                className={`canton-chip ${canton === null ? 'active' : ''}`}
+                onClick={() => setCanton(null)}
               >
-                {c}
+                Tous
               </button>
-            ))}
+              {CANTONS.map((c) => (
+                <button
+                  key={c}
+                  className={`canton-chip ${canton === c ? 'active' : ''}`}
+                  onClick={() => setCanton(canton === c ? null : c)}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-
-      {/* ─── STATS ÉDITORIAL ─── */}
-      <section className="stats-editorial">
-        <div className="stat-block">
-          <div className="stat-num">
-            40<span className="accent">k</span>
-          </div>
-          <div className="stat-label">Entreprises romandes référencées</div>
-        </div>
-        <div className="stat-block">
-          <div className="stat-num">14</div>
-          <div className="stat-label">Secteurs d&apos;activité classés</div>
-        </div>
-        <div className="stat-block">
-          <div className="stat-num">7</div>
-          <div className="stat-label">Cantons de Suisse romande</div>
-        </div>
-        <div className="stat-block">
-          <div className="stat-num">
-            <span className="accent">↑</span>100
-          </div>
-          <div className="stat-label">Fiches enrichies par jour</div>
-        </div>
-      </section>
-
-      {/* ─── RÉSULTATS ─── */}
-      <section className="entreprises-section">
-        <div className="section-header">
-          <div>
-            <span className="section-num">— 01 / Annuaire</span>
-            <h2 className="section-title-big">
-              {recherche || secteur || canton ? (
-                <>Résultats <em>filtrés</em>.</>
-              ) : (
-                <>Récemment <em>vérifiées</em>.</>
-              )}
-            </h2>
-          </div>
-          <p className="section-desc">
-            {total.toLocaleString('fr-CH')} entreprise{total > 1 ? 's' : ''} trouvée
-            {total > 1 ? 's' : ''}
-            {totalPages > 1 && ` · Page ${page + 1} sur ${totalPages}`}
-          </p>
         </div>
 
+        {/* Résultats */}
         {loading && page === 0 ? (
           <p className="loading">Chargement…</p>
         ) : entreprises.length === 0 ? (
@@ -315,6 +307,30 @@ export default function Home() {
             </button>
           </div>
         )}
+      </section>
+
+      {/* ─── STATS ÉDITORIAL ─── */}
+      <section className="stats-editorial">
+        <div className="stat-block">
+          <div className="stat-num">
+            40<span className="accent">k</span>
+          </div>
+          <div className="stat-label">Entreprises romandes référencées</div>
+        </div>
+        <div className="stat-block">
+          <div className="stat-num">14</div>
+          <div className="stat-label">Secteurs d&apos;activité classés</div>
+        </div>
+        <div className="stat-block">
+          <div className="stat-num">7</div>
+          <div className="stat-label">Cantons de Suisse romande</div>
+        </div>
+        <div className="stat-block">
+          <div className="stat-num">
+            <span className="accent">↑</span>100
+          </div>
+          <div className="stat-label">Fiches enrichies par jour</div>
+        </div>
       </section>
 
       {/* ─── FOOTER ─── */}
@@ -481,34 +497,26 @@ export default function Home() {
           display: inline-block;
         }
 
-        .search-section {
+        .annuaire-section {
           padding: 120px 40px 80px;
-          display: grid; grid-template-columns: 1fr 2fr;
-          gap: 80px; align-items: start;
         }
-        .search-eyebrow {
-          font-size: 12px; text-transform: uppercase;
-          letter-spacing: 0.16em; color: var(--ink-soft);
-          margin-bottom: 12px; display: block;
+
+        .search-bar {
+          display: flex;
+          gap: 16px;
+          align-items: stretch;
+          margin-bottom: 16px;
         }
-        .search-title {
-          font-family: var(--serif);
-          font-weight: 500;
-          font-size: clamp(36px, 4.5vw, 56px);
-          line-height: 1.05; letter-spacing: -0.025em;
-        }
-        .search-title em { font-style: italic; color: var(--accent); font-weight: 400; }
-        .search-area { width: 100%; }
         .search-input-wrap {
+          flex: 1;
           position: relative;
           border-bottom: 1px solid var(--ink);
           padding: 16px 60px 16px 0;
-          margin-bottom: 32px;
         }
         .search-input {
           width: 100%; border: none; background: transparent; outline: none;
           font-family: var(--serif);
-          font-size: clamp(22px, 2.4vw, 32px);
+          font-size: clamp(20px, 2.2vw, 28px);
           font-weight: 400; color: var(--ink); font-style: italic;
         }
         .search-input::placeholder { color: var(--ink-mute); font-style: italic; }
@@ -523,11 +531,51 @@ export default function Home() {
         .search-submit svg { width: 20px; height: 20px; }
         .search-submit:hover { background: var(--accent); }
 
+        .filters-toggle {
+          display: flex; align-items: center; gap: 10px;
+          background: transparent;
+          border: 1px solid var(--ink);
+          color: var(--ink);
+          padding: 0 24px;
+          font-size: 13px; font-weight: 500;
+          letter-spacing: 0.04em; text-transform: uppercase;
+          border-radius: 100px;
+          white-space: nowrap;
+          transition: all 0.2s;
+          position: relative;
+        }
+        .filters-toggle:hover { background: var(--ink); color: var(--bg); }
+        .filters-toggle.active { background: var(--ink); color: var(--bg); }
+        .filters-toggle .filters-chevron {
+          width: 14px; height: 14px;
+          transition: transform 0.3s;
+        }
+        .filters-toggle.active .filters-chevron { transform: rotate(180deg); }
+        .filters-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--accent);
+        }
+
+        .filters-panel {
+          display: grid;
+          grid-template-rows: 0fr;
+          overflow: hidden;
+          transition: grid-template-rows 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .filters-panel.open {
+          grid-template-rows: 1fr;
+        }
+        .filters-panel-inner {
+          min-height: 0;
+          overflow: hidden;
+          padding-top: 24px;
+        }
+
         .filter-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
           gap: 8px;
-          margin-bottom: 32px;
+          margin-bottom: 24px;
         }
         .filter-tag {
           font-family: var(--sans);
@@ -551,6 +599,7 @@ export default function Home() {
           display: flex; flex-wrap: wrap; gap: 8px;
           align-items: center;
           padding-top: 24px;
+          padding-bottom: 40px;
           border-top: 1px solid var(--line);
         }
         .canton-label {
@@ -600,7 +649,6 @@ export default function Home() {
           max-width: 200px;
         }
 
-        .entreprises-section { padding: 120px 40px 80px; }
         .section-header {
           display: grid; grid-template-columns: 1fr 1fr;
           gap: 40px; align-items: end;
@@ -643,11 +691,14 @@ export default function Home() {
         .card {
           background: var(--bg); padding: 32px 28px;
           cursor: pointer;
-          transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+          transition: background 0.15s ease, color 0.15s ease, all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
           position: relative; overflow: hidden;
           display: flex; flex-direction: column;
           min-height: 320px;
           color: inherit;
+        }
+        .card:hover {
+          background: var(--bg-warm);
         }
         .card::before {
           content: ''; position: absolute; inset: 0;
@@ -810,8 +861,10 @@ export default function Home() {
           .search-section { grid-template-columns: 1fr; padding: 60px 20px; gap: 40px; }
           .stats-editorial { grid-template-columns: repeat(2, 1fr); gap: 30px; padding: 60px 20px; }
           .stat-block:nth-child(3) { border-left: none; padding-left: 0; }
-          .entreprises-section { padding: 60px 20px; }
+          .annuaire-section { padding: 60px 20px; }
           .section-header { grid-template-columns: 1fr; }
+          .search-bar { flex-direction: column; }
+          .filters-toggle { justify-content: center; padding: 14px; }
           .section-desc { justify-self: start; }
           .cards { grid-template-columns: 1fr; }
           footer { padding: 60px 20px 0; }
