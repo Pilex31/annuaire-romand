@@ -40,8 +40,6 @@ export default function JournalPage() {
     ? articles.filter((a) => a.theme === themeActif)
     : articles
 
-  const [aLaUne, ...autres] = articlesFiltres
-
   function formatDate(d) {
     if (!d) return ''
     return new Date(d).toLocaleDateString('fr-CH', {
@@ -107,48 +105,24 @@ export default function JournalPage() {
         ) : articlesFiltres.length === 0 ? (
           <p className="jp-empty">Aucun article pour le moment. Revenez bientôt.</p>
         ) : (
-          <>
-            {/* Article à la une */}
-            {aLaUne && (
-              <Link href={`/journal/${aLaUne.slug}`} className="une">
-                <div className="une-meta">
-                  {aLaUne.theme && <span className="une-theme">{aLaUne.theme}</span>}
-                  {aLaUne.sponsor_nom && (
-                    <span className="une-sponsor">En partenariat avec {aLaUne.sponsor_nom}</span>
-                  )}
+          <div className="liste">
+            {articlesFiltres.map((a) => (
+              <Link key={a.slug} href={`/journal/${a.slug}`} className="ligne">
+                <div className="ligne-corps">
+                  <div className="ligne-meta">
+                    {a.theme && <span className="ligne-theme">{a.theme}</span>}
+                    <span className="ligne-date">{formatDate(a.publie_le)}</span>
+                    <span className="ligne-sep">·</span>
+                    <span>{a.temps_lecture} min</span>
+                    {a.sponsor_nom && <span className="ligne-sponsor">Partenaire</span>}
+                  </div>
+                  <h2 className="ligne-titre">{a.titre}</h2>
+                  <p className="ligne-chapo">{a.chapo}</p>
                 </div>
-                <h2 className="une-titre">{aLaUne.titre}</h2>
-                <p className="une-chapo">{aLaUne.chapo}</p>
-                <div className="une-bas">
-                  <span>{formatDate(aLaUne.publie_le)}</span>
-                  <span>·</span>
-                  <span>{aLaUne.temps_lecture} min de lecture</span>
-                  <span className="une-fleche">→</span>
-                </div>
+                <span className="ligne-fleche">→</span>
               </Link>
-            )}
-
-            {/* Les autres en grille */}
-            {autres.length > 0 && (
-              <div className="grille">
-                {autres.map((a) => (
-                  <Link key={a.slug} href={`/journal/${a.slug}`} className="art-card">
-                    <div className="art-meta">
-                      {a.theme && <span className="art-theme">{a.theme}</span>}
-                      {a.sponsor_nom && <span className="art-sponsor">Partenaire</span>}
-                    </div>
-                    <h3 className="art-titre">{a.titre}</h3>
-                    <p className="art-chapo">{a.chapo}</p>
-                    <div className="art-bas">
-                      <span>{formatDate(a.publie_le)}</span>
-                      <span>·</span>
-                      <span>{a.temps_lecture} min</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </>
+            ))}
+          </div>
         )}
       </main>
 
@@ -277,138 +251,83 @@ export default function JournalPage() {
           padding: 40px 0;
         }
 
-        /* Article à la une */
-        .une {
-          display: block;
-          background: var(--ink);
-          color: var(--bg);
-          border-radius: 16px;
-          padding: 56px;
-          margin-bottom: 48px;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .une:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
-        }
-        .une-meta {
-          display: flex;
-          gap: 16px;
-          align-items: center;
-          margin-bottom: 24px;
-        }
-        .une-theme {
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          color: var(--accent);
-          font-weight: 600;
-        }
-        .une-sponsor {
-          font-size: 11px;
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-          color: rgba(242, 237, 229, 0.6);
-          border: 1px solid rgba(242, 237, 229, 0.25);
-          padding: 4px 10px;
-          border-radius: 100px;
-        }
-        .une-titre {
-          font-family: var(--serif);
-          font-weight: 500;
-          font-size: clamp(30px, 4vw, 48px);
-          line-height: 1.08;
-          letter-spacing: -0.02em;
-          margin-bottom: 20px;
-          max-width: 760px;
-        }
-        .une-chapo {
-          font-size: 18px;
-          line-height: 1.6;
-          color: rgba(242, 237, 229, 0.75);
-          max-width: 640px;
-          margin-bottom: 32px;
-        }
-        .une-bas {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 13px;
-          color: rgba(242, 237, 229, 0.6);
-        }
-        .une-fleche {
-          margin-left: auto;
-          font-size: 24px;
-          color: var(--accent);
-        }
-
-        /* Grille des autres articles */
-        .grille {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 24px;
-        }
-        .art-card {
+        /* Liste classique : tous les articles au même niveau */
+        .liste {
           display: flex;
           flex-direction: column;
-          background: var(--paper);
-          border: 1px solid var(--line);
-          border-radius: 12px;
-          padding: 36px;
-          transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+          border-top: 1px solid var(--line);
         }
-        .art-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
-          border-color: var(--ink);
-        }
-        .art-meta {
+        .ligne {
           display: flex;
-          gap: 12px;
           align-items: center;
-          margin-bottom: 16px;
+          gap: 32px;
+          padding: 36px 8px;
+          border-bottom: 1px solid var(--line);
+          transition: background 0.2s ease, padding 0.2s ease;
         }
-        .art-theme {
-          font-size: 11px;
+        .ligne:hover {
+          background: var(--paper);
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        .ligne-corps {
+          flex: 1;
+          min-width: 0;
+        }
+        .ligne-meta {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 12px;
+          color: var(--ink-mute);
+          margin-bottom: 12px;
+          flex-wrap: wrap;
+        }
+        .ligne-theme {
+          color: var(--accent);
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          color: var(--accent);
           font-weight: 600;
         }
-        .art-sponsor {
-          font-size: 10px;
+        .ligne-sep {
+          opacity: 0.5;
+        }
+        .ligne-sponsor {
           text-transform: uppercase;
           letter-spacing: 0.06em;
           color: var(--ink-mute);
           border: 1px solid var(--line);
           padding: 3px 8px;
           border-radius: 100px;
+          font-size: 10px;
         }
-        .art-titre {
+        .ligne-titre {
           font-family: var(--serif);
           font-weight: 500;
-          font-size: 24px;
+          font-size: clamp(22px, 2.6vw, 30px);
           line-height: 1.15;
           letter-spacing: -0.015em;
-          margin-bottom: 14px;
+          margin-bottom: 10px;
         }
-        .art-chapo {
-          font-size: 14px;
+        .ligne-chapo {
+          font-size: 15px;
           line-height: 1.55;
           color: var(--ink-soft);
-          margin-bottom: 24px;
-          flex-grow: 1;
+          max-width: 760px;
           display: -webkit-box;
-          -webkit-line-clamp: 3;
+          -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
-        .art-bas {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 12px;
+        .ligne-fleche {
+          flex-shrink: 0;
+          font-size: 24px;
           color: var(--ink-mute);
+          transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .ligne:hover .ligne-fleche {
+          color: var(--accent);
+          transform: translateX(6px);
         }
 
         @media (max-width: 800px) {
@@ -423,11 +342,18 @@ export default function JournalPage() {
           .jp-main {
             padding: 48px 20px 80px;
           }
-          .une {
-            padding: 36px 28px;
+          .ligne {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 28px 8px;
           }
-          .grille {
-            grid-template-columns: 1fr;
+          .ligne:hover {
+            padding-left: 8px;
+            padding-right: 8px;
+          }
+          .ligne-fleche {
+            display: none;
           }
         }
       `}</style>
