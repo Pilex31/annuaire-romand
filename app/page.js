@@ -108,9 +108,8 @@ export default function Home() {
         </Link>
         <nav>
           <a href="#annuaire">Annuaire</a>
-          <a href="#secteurs">Secteurs</a>
-          <a href="#tarifs">Tarifs</a>
-          <a href="#referencer">Référencer</a>
+          <Link href="/journal">Le Journal</Link>
+          <Link href="/tarifs">Tarifs</Link>
           {sessionUser ? (
             <Link href="/compte" className="nav-account">
               Mon compte
@@ -369,8 +368,8 @@ export default function Home() {
           </div>
           <div className="footer-col">
             <h4>Hélio</h4>
-            <a href="#tarifs">Tarifs</a>
-            <a href="#referencer">Référencer</a>
+            <Link href="/tarifs">Tarifs</Link>
+            <Link href="/journal">Le Journal</Link>
             <a href="#">À propos</a>
           </div>
         </div>
