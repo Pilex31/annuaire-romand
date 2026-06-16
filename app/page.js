@@ -40,6 +40,7 @@ export default function Home() {
   const [page, setPage] = useState(0)
   const [filtresOuverts, setFiltresOuverts] = useState(false)
   const [sessionUser, setSessionUser] = useState(null)
+  const [menuOuvert, setMenuOuvert] = useState(false)
 
   useEffect(() => {
     // Vérifie si l'utilisateur est connecté (pour afficher "Mon compte")
@@ -106,16 +107,28 @@ export default function Home() {
         <Link className="mark" href="/">
           Hélio<span style={{ color: 'var(--accent)' }}>.</span>
         </Link>
-        <nav>
-          <a href="#annuaire">Annuaire</a>
-          <Link href="/journal">Le Journal</Link>
-          <Link href="/tarifs">Tarifs</Link>
+
+        {/* Bouton hamburger (mobile seulement) */}
+        <button
+          className={`burger ${menuOuvert ? 'open' : ''}`}
+          onClick={() => setMenuOuvert(!menuOuvert)}
+          aria-label="Menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav className={menuOuvert ? 'open' : ''}>
+          <a href="#annuaire" onClick={() => setMenuOuvert(false)}>Annuaire</a>
+          <Link href="/journal" onClick={() => setMenuOuvert(false)}>Le Journal</Link>
+          <Link href="/tarifs" onClick={() => setMenuOuvert(false)}>Tarifs</Link>
           {sessionUser ? (
-            <Link href="/compte" className="nav-account">
+            <Link href="/compte" className="nav-account" onClick={() => setMenuOuvert(false)}>
               Mon compte
             </Link>
           ) : (
-            <Link href="/connexion" className="nav-account">
+            <Link href="/connexion" className="nav-account" onClick={() => setMenuOuvert(false)}>
               Se connecter
             </Link>
           )}
@@ -427,6 +440,37 @@ export default function Home() {
         nav :global(.nav-account)::after { display: none; }
         nav :global(.nav-account):hover {
           background: currentColor;
+        }
+
+        /* Bouton hamburger — caché sur desktop */
+        .burger {
+          display: none;
+          flex-direction: column;
+          justify-content: center;
+          gap: 5px;
+          width: 40px;
+          height: 40px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 8px;
+          z-index: 200;
+        }
+        .burger span {
+          display: block;
+          width: 100%;
+          height: 2px;
+          background: currentColor;
+          transition: transform 0.3s ease, opacity 0.2s ease;
+        }
+        .burger.open span:nth-child(1) {
+          transform: translateY(7px) rotate(45deg);
+        }
+        .burger.open span:nth-child(2) {
+          opacity: 0;
+        }
+        .burger.open span:nth-child(3) {
+          transform: translateY(-7px) rotate(-45deg);
         }
 
         .hero {
@@ -797,9 +841,51 @@ export default function Home() {
         }
 
         @media (max-width: 900px) {
-          .topbar { padding: 16px 20px; }
-          nav { gap: 16px; }
-          nav a { font-size: 11px; }
+          .topbar {
+            padding: 16px 20px;
+            mix-blend-mode: normal;
+            color: var(--ink);
+            background: rgba(242, 237, 229, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--line);
+          }
+          .burger { display: flex; }
+          nav {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: min(80vw, 320px);
+            flex-direction: column;
+            gap: 0;
+            background: var(--ink);
+            padding: 100px 32px 40px;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.3);
+          }
+          nav.open {
+            transform: translateX(0);
+          }
+          nav a {
+            font-size: 18px;
+            color: var(--bg);
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(242, 237, 229, 0.12);
+            width: 100%;
+          }
+          nav a::after { display: none; }
+          nav :global(.nav-account) {
+            border: none;
+            border-radius: 0;
+            padding: 18px 0;
+            margin-top: 8px;
+            color: var(--accent);
+            font-weight: 600;
+          }
+          nav :global(.nav-account):hover {
+            background: transparent;
+          }
           .hero { padding: 100px 20px 40px; }
           .hero-top { grid-template-columns: 1fr; }
           .hero-tag-right { justify-self: start; text-align: left; max-width: 100%; }
@@ -816,6 +902,14 @@ export default function Home() {
           footer { padding: 60px 20px 0; }
           .footer-grid { grid-template-columns: 1fr; gap: 40px; }
           .marquee-track { font-size: 22px; }
+        }
+
+        /* Très petits téléphones : on bride les titres géants */
+        @media (max-width: 480px) {
+          .stats-editorial { grid-template-columns: 1fr; }
+          .stat-block:nth-child(2) { border-left: none; padding-left: 0; }
+          .hero-claim { font-size: 30px; }
+          .marquee-track { font-size: 18px; }
         }
       `}</style>
 
