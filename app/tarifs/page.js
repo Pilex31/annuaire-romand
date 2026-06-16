@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabaseClient'
 
 export default function TarifsPage() {
   const [sessionUser, setSessionUser] = useState(null)
+  const [menuOuvert, setMenuOuvert] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -27,11 +28,20 @@ export default function TarifsPage() {
         <Link className="tp-mark" href="/">
           Hélio<span className="dot-accent">.</span>
         </Link>
-        <nav className="tp-nav">
-          <Link href="/#annuaire">Annuaire</Link>
-          <Link href="/journal">Le Journal</Link>
-          <Link href="/tarifs" className="actif">Tarifs</Link>
-          <Link href={sessionUser ? '/compte' : '/connexion'} className="tp-account">
+        <button
+          className={`tp-burger ${menuOuvert ? 'open' : ''}`}
+          onClick={() => setMenuOuvert(!menuOuvert)}
+          aria-label="Menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <nav className={`tp-nav ${menuOuvert ? 'open' : ''}`}>
+          <Link href="/#annuaire" onClick={() => setMenuOuvert(false)}>Annuaire</Link>
+          <Link href="/journal" onClick={() => setMenuOuvert(false)}>Le Journal</Link>
+          <Link href="/tarifs" className="actif" onClick={() => setMenuOuvert(false)}>Tarifs</Link>
+          <Link href={sessionUser ? '/compte' : '/connexion'} className="tp-account" onClick={() => setMenuOuvert(false)}>
             {sessionUser ? 'Mon compte' : 'Se connecter'}
           </Link>
         </nav>
@@ -181,6 +191,29 @@ export default function TarifsPage() {
           background: var(--ink);
           color: var(--bg);
         }
+        .tp-burger {
+          display: none;
+          flex-direction: column;
+          justify-content: center;
+          gap: 5px;
+          width: 40px;
+          height: 40px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 8px;
+          z-index: 200;
+        }
+        .tp-burger span {
+          display: block;
+          width: 100%;
+          height: 2px;
+          background: var(--ink);
+          transition: transform 0.3s ease, opacity 0.2s ease;
+        }
+        .tp-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .tp-burger.open span:nth-child(2) { opacity: 0; }
+        .tp-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
         .tp-main {
           max-width: 1080px;
@@ -420,10 +453,37 @@ export default function TarifsPage() {
           .tp-top {
             padding: 20px;
           }
+          .tp-burger { display: flex; }
           .tp-nav {
-            gap: 16px;
-            width: 100%;
-            flex-wrap: wrap;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: min(80vw, 320px);
+            flex-direction: column;
+            gap: 0;
+            align-items: stretch;
+            background: var(--ink);
+            padding: 100px 32px 40px;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.3);
+            z-index: 150;
+          }
+          .tp-nav.open { transform: translateX(0); }
+          .tp-nav :global(a) {
+            font-size: 18px;
+            color: var(--bg);
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(242, 237, 229, 0.12);
+          }
+          .tp-nav :global(a.actif) { color: var(--accent); }
+          .tp-nav :global(.tp-account) {
+            border: none;
+            border-radius: 0;
+            padding: 18px 0;
+            color: var(--accent);
+            font-weight: 600;
           }
           .tp-main {
             padding: 48px 20px 80px;
