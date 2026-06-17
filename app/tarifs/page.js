@@ -38,6 +38,7 @@ export default function TarifsPage() {
           <span></span>
         </button>
         <nav className={`tp-nav ${menuOuvert ? 'open' : ''}`}>
+          <button className="tp-close" onClick={() => setMenuOuvert(false)} aria-label="Fermer">✕</button>
           <Link href="/#annuaire" onClick={() => setMenuOuvert(false)}>Annuaire</Link>
           <Link href="/journal" onClick={() => setMenuOuvert(false)}>Le Journal</Link>
           <Link href="/tarifs" className="actif" onClick={() => setMenuOuvert(false)}>Tarifs</Link>
@@ -471,6 +472,17 @@ export default function TarifsPage() {
             z-index: 150;
           }
           .tp-nav.open { transform: translateX(0); }
+          .tp-close {
+            position: absolute;
+            top: 28px;
+            right: 28px;
+            background: transparent;
+            border: none;
+            color: var(--bg);
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+          }
           .tp-nav :global(a) {
             font-size: 18px;
             color: var(--bg);
