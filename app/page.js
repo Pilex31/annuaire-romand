@@ -447,18 +447,19 @@ export default function Home() {
           font-size: 22px;
           letter-spacing: -0.02em;
         }
-        .nav-desktop { display: flex; gap: 32px; }
-        .nav-desktop a {
+        .nav-desktop { display: flex; align-items: center; gap: 32px; }
+        .nav-desktop :global(a) {
           font-size: 13px; font-weight: 500;
           letter-spacing: 0.04em; text-transform: uppercase;
           position: relative;
+          line-height: 1;
         }
-        .nav-desktop a::after {
+        .nav-desktop :global(a)::after {
           content: ''; position: absolute; bottom: -4px; left: 0;
           width: 0; height: 1px; background: currentColor;
           transition: width 0.3s ease;
         }
-        .nav-desktop a:hover::after { width: 100%; }
+        .nav-desktop :global(a):hover::after { width: 100%; }
         .nav-desktop :global(.nav-account) {
           border: 1px solid currentColor;
           padding: 8px 18px;
@@ -930,12 +931,13 @@ export default function Home() {
             cursor: pointer;
             line-height: 1;
           }
-          .nav-mobile a {
+          .nav-mobile :global(a) {
             font-size: 18px;
             color: #F2EDE5;
             padding: 18px 0;
             border-bottom: 1px solid rgba(242, 237, 229, 0.12);
             width: 100%;
+            display: block;
           }
           .nav-mobile :global(.nav-account) {
             border: none;
