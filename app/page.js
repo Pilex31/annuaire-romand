@@ -119,21 +119,49 @@ export default function Home() {
           <span></span>
         </button>
 
-        <nav className={menuOuvert ? 'open' : ''}>
-          <a href="#annuaire" onClick={() => setMenuOuvert(false)}>Annuaire</a>
-          <Link href="/journal" onClick={() => setMenuOuvert(false)}>Le Journal</Link>
-          <Link href="/tarifs" onClick={() => setMenuOuvert(false)}>Tarifs</Link>
+        {/* Nav desktop (reste dans la topbar) */}
+        <nav className="nav-desktop">
+          <a href="#annuaire">Annuaire</a>
+          <Link href="/journal">Le Journal</Link>
+          <Link href="/tarifs">Tarifs</Link>
           {sessionUser ? (
-            <Link href="/compte" className="nav-account" onClick={() => setMenuOuvert(false)}>
+            <Link href="/compte" className="nav-account">
               Mon compte
             </Link>
           ) : (
-            <Link href="/connexion" className="nav-account" onClick={() => setMenuOuvert(false)}>
+            <Link href="/connexion" className="nav-account">
               Se connecter
             </Link>
           )}
         </nav>
       </div>
+
+      {/* Menu mobile (HORS topbar, pour échapper au blend-mode) */}
+      {menuOuvert && (
+        <div className="menu-overlay" onClick={() => setMenuOuvert(false)} />
+      )}
+      <nav className={`nav-mobile ${menuOuvert ? 'open' : ''}`}>
+        <button
+          className="menu-close"
+          onClick={() => setMenuOuvert(false)}
+          aria-label="Fermer"
+        >
+          ✕
+        </button>
+        <a href="#annuaire" onClick={() => setMenuOuvert(false)}>Annuaire</a>
+        <Link href="/journal" onClick={() => setMenuOuvert(false)}>Le Journal</Link>
+        <Link href="/tarifs" onClick={() => setMenuOuvert(false)}>Tarifs</Link>
+        {sessionUser ? (
+          <Link href="/compte" className="nav-account" onClick={() => setMenuOuvert(false)}>
+            Mon compte
+          </Link>
+        ) : (
+          <Link href="/connexion" className="nav-account" onClick={() => setMenuOuvert(false)}>
+            Se connecter
+          </Link>
+        )}
+      </nav>
+
 
       {/* ─── HERO ─── */}
       <section className="hero">
@@ -419,28 +447,32 @@ export default function Home() {
           font-size: 22px;
           letter-spacing: -0.02em;
         }
-        nav { display: flex; gap: 32px; }
-        nav a {
+        .nav-desktop { display: flex; gap: 32px; }
+        .nav-desktop a {
           font-size: 13px; font-weight: 500;
           letter-spacing: 0.04em; text-transform: uppercase;
           position: relative;
         }
-        nav a::after {
+        .nav-desktop a::after {
           content: ''; position: absolute; bottom: -4px; left: 0;
           width: 0; height: 1px; background: currentColor;
           transition: width 0.3s ease;
         }
-        nav a:hover::after { width: 100%; }
-        nav :global(.nav-account) {
+        .nav-desktop a:hover::after { width: 100%; }
+        .nav-desktop :global(.nav-account) {
           border: 1px solid currentColor;
           padding: 8px 18px;
           border-radius: 100px;
           transition: background 0.2s, color 0.2s;
         }
-        nav :global(.nav-account)::after { display: none; }
-        nav :global(.nav-account):hover {
+        .nav-desktop :global(.nav-account)::after { display: none; }
+        .nav-desktop :global(.nav-account):hover {
           background: currentColor;
         }
+
+        /* Menu mobile : caché par défaut (desktop) */
+        .nav-mobile { display: none; }
+        .menu-overlay { display: none; }
 
         /* Bouton hamburger — caché sur desktop */
         .burger {
@@ -849,42 +881,69 @@ export default function Home() {
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--line);
           }
+          .nav-desktop { display: none; }
           .burger { display: flex; }
-          nav {
+
+          /* Voile sombre derrière le menu */
+          .menu-overlay {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 22, 18, 0.5);
+            z-index: 250;
+            animation: fadeIn 0.25s ease;
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+
+          /* Panneau du menu mobile */
+          .nav-mobile {
+            display: flex;
             position: fixed;
             top: 0;
             right: 0;
             bottom: 0;
-            width: min(80vw, 320px);
+            height: 100vh;
+            width: min(82vw, 320px);
             flex-direction: column;
-            gap: 0;
-            background: var(--ink);
-            padding: 100px 32px 40px;
+            background: #1A1612;
+            padding: 88px 32px 40px;
             transform: translateX(100%);
             transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.3);
+            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.4);
+            z-index: 300;
+            overflow-y: auto;
           }
-          nav.open {
+          .nav-mobile.open {
             transform: translateX(0);
           }
-          nav a {
+          .menu-close {
+            position: absolute;
+            top: 28px;
+            right: 28px;
+            background: transparent;
+            border: none;
+            color: #F2EDE5;
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+          }
+          .nav-mobile a {
             font-size: 18px;
-            color: var(--bg);
+            color: #F2EDE5;
             padding: 18px 0;
             border-bottom: 1px solid rgba(242, 237, 229, 0.12);
             width: 100%;
           }
-          nav a::after { display: none; }
-          nav :global(.nav-account) {
+          .nav-mobile :global(.nav-account) {
             border: none;
             border-radius: 0;
             padding: 18px 0;
             margin-top: 8px;
-            color: var(--accent);
+            color: #D4502A;
             font-weight: 600;
-          }
-          nav :global(.nav-account):hover {
-            background: transparent;
           }
           .hero { padding: 100px 20px 40px; }
           .hero-top { grid-template-columns: 1fr; }
