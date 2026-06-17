@@ -67,6 +67,7 @@ export default function JournalPage() {
           <span></span>
         </button>
         <nav className={`jp-nav ${menuOuvert ? 'open' : ''}`}>
+          <button className="jp-close" onClick={() => setMenuOuvert(false)} aria-label="Fermer">✕</button>
           <Link href="/#annuaire" onClick={() => setMenuOuvert(false)}>Annuaire</Link>
           <Link href="/journal" className="actif" onClick={() => setMenuOuvert(false)}>Le Journal</Link>
           <Link href="/tarifs" onClick={() => setMenuOuvert(false)}>Tarifs</Link>
@@ -385,6 +386,17 @@ export default function JournalPage() {
             z-index: 150;
           }
           .jp-nav.open { transform: translateX(0); }
+          .jp-close {
+            position: absolute;
+            top: 28px;
+            right: 28px;
+            background: transparent;
+            border: none;
+            color: var(--bg);
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+          }
           .jp-nav :global(a) {
             font-size: 18px;
             color: var(--bg);
