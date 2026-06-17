@@ -67,6 +67,7 @@ export default function ArticlePage() {
           <span></span>
         </button>
         <nav className={`ap-nav ${menuOuvert ? 'open' : ''}`}>
+          <button className="ap-close" onClick={() => setMenuOuvert(false)} aria-label="Fermer">✕</button>
           <Link href="/#annuaire" onClick={() => setMenuOuvert(false)}>Annuaire</Link>
           <Link href="/journal" className="actif" onClick={() => setMenuOuvert(false)}>Le Journal</Link>
           <Link href="/tarifs" onClick={() => setMenuOuvert(false)}>Tarifs</Link>
@@ -363,6 +364,17 @@ export default function ArticlePage() {
             z-index: 150;
           }
           .ap-nav.open { transform: translateX(0); }
+          .ap-close {
+            position: absolute;
+            top: 28px;
+            right: 28px;
+            background: transparent;
+            border: none;
+            color: var(--bg);
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+          }
           .ap-nav :global(a) {
             font-size: 18px;
             color: var(--bg);
