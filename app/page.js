@@ -883,7 +883,8 @@ export default function Home() {
             border-bottom: 1px solid var(--line);
           }
           .nav-desktop { display: none; }
-          .burger { display: flex; }
+          .burger { display: flex; mix-blend-mode: normal; }
+          .burger span { background: #1A1612 !important; }
 
           /* Voile sombre derrière le menu */
           .menu-overlay {
